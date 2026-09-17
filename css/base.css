@@ -1,0 +1,248 @@
+/* ============================================================
+   base.css — 배경, 앱 셸, 화면 뼈대, 상단바
+   ============================================================ */
+
+body {
+  background: var(--sky);
+  overflow-x: clip;
+  --bg-image: url("../public/background/pixel-flower-meadow.png");
+}
+
+/* 픽셀 아트 배경. body에 filter를 걸면 UI까지 필터링되고
+   containing block이 생겨 position:fixed 자손이 전부 깨지므로 의사요소에만 건다. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  background: var(--bg-image) center / cover no-repeat;
+  image-rendering: pixelated;
+  filter: saturate(0.72) brightness(1.06) blur(1.5px);
+  transform: scale(1.04);
+  pointer-events: none;
+}
+
+/* 스크림 — UI가 배경 위에서 확실히 뜨게 */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(180deg, var(--veil), var(--veil-strong));
+  pointer-events: none;
+}
+
+body[data-theme="party"] {
+  --bg-image: url("../public/background/party.jpg");
+}
+
+/* 픽셀 배경이 아니라 이미 부드러운 그림이라 블러를 거의 안 준다 */
+body[data-theme="party"]::before {
+  image-rendering: auto;
+  filter: saturate(0.88) brightness(1.04) blur(0.5px);
+}
+
+body[data-theme="lake"] {
+  --bg-image: url("../public/background/pixel-cherry-lake.png");
+}
+
+body[data-theme="seaside"] {
+  --bg-image: url("../public/background/pixel-seaside-village.png");
+}
+
+body[data-uploaded-background="true"] {
+  --bg-image: var(--uploaded-background);
+}
+
+body[data-uploaded-background="true"]::before {
+  image-rendering: auto;
+}
+
+/* ---------- 떠다니는 구름 (HTML에 이미 있던 요소를 되살림) ---------- */
+
+.sky-decor {
+  position: fixed;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.5;
+  width: 126px;
+  height: 42px;
+  background: var(--white);
+  border-radius: var(--r-pill);
+}
+
+.sky-decor::before,
+.sky-decor::after {
+  content: "";
+  position: absolute;
+  background: var(--white);
+  border-radius: 50%;
+}
+
+.sky-decor::before {
+  width: 62px;
+  height: 62px;
+  left: 22px;
+  top: -26px;
+}
+
+.sky-decor::after {
+  width: 44px;
+  height: 44px;
+  right: 18px;
+  top: -18px;
+}
+
+.cloud.one {
+  top: 12%;
+  left: -180px;
+  animation: drift 42s linear infinite;
+}
+
+.cloud.two {
+  top: 26%;
+  left: -180px;
+  transform: scale(0.58);
+  opacity: 0.38;
+  animation: drift 63s linear infinite;
+  animation-delay: -22s;
+}
+
+.confetti {
+  display: none;
+}
+
+/* ---------- 앱 셸 ---------- */
+
+.app-shell {
+  position: relative;
+  z-index: 1;
+  width: min(100%, var(--shell));
+  margin-inline: auto;
+  /* 아래 여백은 s6(44px)이었다. 낮은 폰에서 그 44px이 마지막 버튼을 밀어내는 만큼의
+     값을 하지 못했다. s5로도 바닥에 붙어 보이지 않는다. */
+  padding: var(--s3) var(--s3) var(--s5);
+  min-height: 100dvh;
+  overflow: visible;
+}
+
+.screen {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s3);
+  min-height: calc(100dvh - var(--s5) - var(--s3));
+}
+
+/* ---------- 상단바 ---------- */
+
+/* 양쪽 폭을 똑같이 잡아야 제목이 화면 한가운데 온다.
+   오른쪽에 음소거(40px)와 처음부터(48px)가 들어가므로 양쪽 다 92px.
+   가장 긴 제목("사촌동생 3의 도전" 155px)이 한 줄에 들어가도록 간격은 좁게 잡았다 —
+   96px + s2 간격으로 뒀더니 152px밖에 안 남아 제목이 두 줄로 접혔다. */
+.topbar {
+  display: grid;
+  grid-template-columns: 92px 1fr 92px;
+  align-items: center;
+  gap: var(--s1);
+  padding-block: var(--s1);
+}
+
+.topbar-side {
+  display: flex;
+  align-items: center;
+  gap: var(--s1);
+}
+
+.topbar-side--end {
+  justify-content: flex-end;
+}
+
+.topbar h1 {
+  text-align: center;
+  /* 음소거 버튼이 들어오면서 제목 칸이 144px로 좁아졌다.
+     step-1로 두면 "사촌동생 3의 도전"처럼 긴 제목이 두 줄로 접혀 상단바가 부풀고
+     게임판 높이를 갉아먹는다. 제목은 아래 안내줄에 견주면 보조 정보라 한 단계 줄인다. */
+  font-size: var(--step-0);
+  color: var(--ink);
+  text-shadow: 0 2px 0 var(--white), 0 -2px 0 var(--white), 2px 0 0 var(--white),
+    -2px 0 0 var(--white);
+}
+
+/* ---------- 로비 ---------- */
+
+.start-screen {
+  align-items: center;
+  justify-content: center;
+  gap: var(--s5);
+  text-align: center;
+  padding-block: var(--s6);
+}
+
+.birthday-hero {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s3);
+  align-items: center;
+}
+
+.birthday-hero h1 {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s1);
+  font-size: var(--step-4);
+  line-height: 0.98;
+  letter-spacing: 0.01em;
+}
+
+/* 그림 타이틀이 기본. 그림이 없으면 h1에 no-art가 붙어 예전 글자가 살아난다. */
+.title-art {
+  display: block;
+  width: min(100%, 30rem);
+  margin-inline: auto;
+  animation: float 3.2s ease-in-out infinite;
+}
+
+.title-line {
+  display: none;
+  justify-content: center;
+}
+
+.birthday-hero h1.no-art .title-line {
+  display: flex;
+}
+
+.birthday-hero h1 b {
+  display: inline-block;
+  font-weight: 400;
+  color: var(--lemon);
+  text-shadow: 0 4px 0 var(--line), 3px 0 0 var(--line), -3px 0 0 var(--line),
+    0 -3px 0 var(--line), 0 9px 0 var(--shade);
+  animation: letter-in 0.5s cubic-bezier(0.34, 1.6, 0.64, 1) both;
+  animation-delay: calc(min(var(--i, 0), 14) * 55ms);
+}
+
+/* 글자마다 알록달록 — 팔레트 토큰만 쓴다 */
+.birthday-hero h1 b:nth-child(4n + 1) {
+  color: var(--pink);
+}
+
+.birthday-hero h1 b:nth-child(4n + 2) {
+  color: var(--lemon);
+}
+
+.birthday-hero h1 b:nth-child(4n + 3) {
+  color: var(--mint);
+}
+
+.birthday-hero h1 b:nth-child(4n) {
+  color: var(--lav);
+}
+
+.birthday-hero p {
+  max-width: 22em;
+  font-family: var(--display);
+  font-size: var(--step-1);
+  color: var(--ink);
+  text-shadow: 0 2px 0 var(--white), 0 -2px 0 var(--white), 2px 0 0 var(--white),
+    -2px 0 0 var(--white), 2px 2px 0 var(--white), -2px 2px 0 var(--white);
+}

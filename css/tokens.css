@@ -1,0 +1,206 @@
+/* ============================================================
+   tokens.css — 팝 캔디 디자인 시스템의 유일한 원천
+   규칙: hex 리터럴과 clamp()는 이 파일 밖에서 사용 금지.
+   ============================================================ */
+
+:root {
+  /* 외곽선은 단 하나. text와 stroke가 같은 값이라 "검정 두 종류"가 구조적으로 불가능. */
+  --line: #2b1a4d;
+  --ink: var(--line);
+
+  --pink: #ff5fa2;
+  --pink-soft: #ffc3dd;
+  --mint: #3fe0c8;
+  --mint-soft: #b9f6ec;
+  --lemon: #ffd93d;
+  --lemon-soft: #fff2b0;
+  --lav: #a98bff;
+  --lav-soft: #ded2ff;
+  --sky: #4fc9ff;
+  --sky-soft: #d6f1ff;
+  --cream: #fffaf0;
+
+  --white: #ffffff;
+  --shade: rgba(43, 26, 77, 0.35);
+  --shade-soft: rgba(43, 26, 77, 0.22);
+  --veil: rgba(255, 250, 240, 0.3);
+  --veil-strong: rgba(255, 250, 240, 0.55);
+  --scrim: rgba(43, 26, 77, 0.55);
+
+  /* 모서리: 4단 (기존 25종) */
+  --r-sm: 10px;
+  --r-md: 18px;
+  --r-lg: 28px;
+  --r-pill: 999px;
+
+  /* 테두리: 2단 (기존 6종) */
+  --bw: 3px;
+  --bw-thick: 5px;
+
+  /* 그림자: 3단 */
+  --sh-1: 0 3px 0 var(--line);
+  --sh-2: 0 6px 0 var(--line);
+  --sh-3: 0 10px 0 var(--line), 0 14px 24px var(--shade-soft);
+
+  /* 여백: 6단 */
+  --s1: 4px;
+  --s2: 8px;
+  --s3: 12px;
+  --s4: 18px;
+  --s5: 28px;
+  --s6: 44px;
+
+  /* 유동 타입 스케일: 6단 (기존 88개 개별 clamp) */
+  --step--1: clamp(12px, 11px + 0.35vw, 14px);
+  --step-0: clamp(14px, 13px + 0.5vw, 17px);
+  --step-1: clamp(18px, 16px + 0.8vw, 23px);
+  --step-2: clamp(23px, 19px + 1.4vw, 32px);
+  --step-3: clamp(30px, 23px + 2.4vw, 46px);
+  --step-4: clamp(42px, 28px + 5vw, 82px);
+
+  /* 이모지 아트 크기 — clamp()는 이 파일에만 존재한다 */
+  --art-sm: clamp(18px, 5vw, 30px);
+  --art-md: clamp(20px, 6vw, 34px);
+  --art-lg: clamp(34px, 9vw, 56px);
+  --art-xl: clamp(56px, 16vw, 92px);
+  --art-2xl: clamp(90px, 26vw, 150px);
+  --stamp-w: clamp(72px, 19vw, 96px);
+
+  --display: Jua, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  --body: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic",
+    "Noto Sans KR", sans-serif;
+  --emoji: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+
+  /* 앱 폭: 375px 레이아웃이 유일한 레이아웃 */
+  --shell: 480px;
+
+  /* pixel-mixing-bowl.png 내부 여백 — PNG를 다시 크롭하면 여기만 고침 */
+  --bowl-in-x: 22%;
+  --bowl-in-top: 27%;
+  --bowl-in-bottom: 34%;
+
+  color-scheme: light;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  font-family: var(--body);
+  font-size: var(--step-0);
+  line-height: 1.55;
+  color: var(--ink);
+  -webkit-tap-highlight-color: transparent;
+  /* PC에서 드래그하면 글자가 파랗게 선택되던 문제.
+     폰은 터치라 원래 잘 안 생기지만, 마우스에서는 계속 생긴다.
+     글을 읽고 복사할 일이 있는 편지 화면만 예외로 둔다. */
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* 입력칸은 반드시 선택·편집이 돼야 한다.
+   body의 user-select:none이 여기까지 먹으면 편집 모드가 통째로 먹통처럼 보인다. */
+input,
+textarea,
+select,
+option,
+[contenteditable],
+.letter-tab p,
+.received-letter {
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--display);
+  font-weight: 400;
+  line-height: 1.2;
+  margin: 0;
+}
+
+h1 {
+  font-size: var(--step-2);
+}
+
+h2 {
+  font-size: var(--step-2);
+}
+
+h3 {
+  font-size: var(--step-1);
+}
+
+p {
+  margin: 0;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+canvas {
+  display: block;
+  touch-action: none;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* 케이크 종류별 색 세트 — hex는 이 파일에만 존재한다는 규칙을 지키기 위해 여기 둔다 */
+
+.cake[data-type="strawberry"] {
+  --cake-body: #ffdcc0;
+  --cake-cream: #fff6ee;
+  --cake-accent: #ff5fa2;
+}
+
+.cake[data-type="chocolate"] {
+  --cake-body: #6b4230;
+  --cake-cream: #f7e2c9;
+  --cake-accent: #4a2a1c;
+}
+
+.cake[data-type="sweet-potato"] {
+  --cake-body: #f0d6b0;
+  --cake-cream: #ffeed6;
+  --cake-accent: #b06fd8;
+}
+
+.cake[data-type="fruit-cream"] {
+  --cake-body: #fff3dd;
+  --cake-cream: #fffaf0;
+  --cake-accent: #3fe0c8;
+}

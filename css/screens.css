@@ -1,0 +1,1554 @@
+/* ============================================================
+   screens.css — 화면별 레이아웃
+   ============================================================ */
+
+/* ---------- 당신은 누구인가요? ---------- */
+
+.identity-screen {
+  gap: var(--s4);
+}
+
+.identity-head {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s2);
+}
+
+.identity-head h1 {
+  font-size: var(--step-3);
+  text-shadow: 0 3px 0 var(--white), 0 -3px 0 var(--white), 3px 0 0 var(--white),
+    -3px 0 0 var(--white);
+}
+
+.identity-head p {
+  font-family: var(--display);
+  text-shadow: 0 2px 0 var(--white), 0 -2px 0 var(--white), 2px 0 0 var(--white),
+    -2px 0 0 var(--white);
+}
+
+.person-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s2);
+}
+
+.person-choice {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: var(--s3);
+  text-align: left;
+  padding: var(--s2) var(--s3);
+  animation: pop-in 0.34s cubic-bezier(0.34, 1.6, 0.64, 1) both;
+  animation-delay: calc(min(var(--i, 0), 8) * 45ms);
+}
+
+.person-name {
+  position: relative;
+  font-family: var(--display);
+  font-size: var(--step-2);
+}
+
+.person-meta {
+  font-family: var(--body);
+  font-size: var(--step--1);
+  opacity: 0.8;
+  white-space: nowrap;
+}
+
+.person-choice.is-clear .person-name {
+  opacity: 0.55;
+}
+
+/* 이름 위에 쾅 찍히는 "참 잘했어요" 도장.
+   교체하려면 public/ui/great-job-stamp.png 파일만 바꾸면 된다. */
+.clear-stamp {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 78px;
+  height: auto;
+  transform: translate(-50%, -50%) rotate(-11deg);
+  pointer-events: none;
+  z-index: 2;
+  animation: stamp 0.4s cubic-bezier(0.3, 1.8, 0.5, 1) both;
+}
+
+.elder .clear-stamp,
+.person-choice .clear-stamp {
+  width: var(--stamp-w);
+}
+
+/* 가족 목록에서는 도장을 이름 칸 오른쪽 끝에 찍는다.
+   가운데(left: 50%)에 찍으면 도장 지름이 이름 폭과 비슷해서 이름을 통째로 덮어버린다.
+   어르신이 읽어야 하는 화면이라 이름 가독성이 먼저다. */
+.person-name .clear-stamp {
+  left: auto;
+  right: 0;
+  transform: translateY(-50%) rotate(-11deg);
+}
+
+.avatar {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  width: var(--sticker, 64px);
+  aspect-ratio: 1;
+  flex: none;
+  background: var(--lav-soft);
+  border: var(--bw) solid var(--line);
+  border-radius: var(--r-lg);
+  box-shadow: var(--sh-1);
+  font-family: var(--emoji);
+  font-size: calc(var(--sticker, 64px) * 0.56);
+  line-height: 1;
+  overflow: hidden;
+}
+
+.avatar img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ---------- 얼굴 꾸미기 (js/face.js) ----------
+   파츠는 같은 크기 캔버스라 겹치기만 하면 된다.
+   --x --y(이동) --ox --oy(크기 기준점)는 캔버스 기준 % 숫자, --sx --sy는 배율로 인라인에서 온다. */
+
+.face {
+  position: absolute;
+  inset: 0;
+}
+
+/* 캔버스 가장자리가 비어 있어서 스티커 칸에서는 조금 크게 */
+.avatar .face {
+  inset: -14%;
+}
+
+.face-part {
+  position: absolute;
+  inset: 0;
+  background: var(--src) center / 100% 100% no-repeat;
+  transform-origin: calc(var(--ox, 50) * 1%) calc(var(--oy, 50) * 1%);
+  transform: translate(calc(var(--x, 0) * 1%), calc(var(--y, 0) * 1%)) scale(var(--sx, 1), var(--sy, 1));
+}
+
+/* 색을 고르면 PNG 모양을 마스크로 쓰고 그 색으로 칠한다 (파츠가 단색이라 가능)
+   색은 색상표에서 자유롭게 고르므로 토큰이 아니라 인라인 숫자 --r --g --b 로 온다 */
+.face-part[data-face-color] {
+  background: rgb(var(--r) var(--g) var(--b));
+  -webkit-mask: var(--src) center / 100% 100% no-repeat;
+  mask: var(--src) center / 100% 100% no-repeat;
+}
+
+.face-part--left {
+  clip-path: inset(0 50% 0 0);
+}
+
+.face-part--right {
+  clip-path: inset(0 0 0 50%);
+}
+
+.face-part--flip {
+  transform: scaleX(-1);
+}
+
+/* 아이템 칸: 그림이 차지하는 영역(--cx --cy)을 칸 가운데로 가져와 --zoom 배 확대 */
+.face--thumb {
+  inset: auto;
+  width: calc(var(--zoom) * 100%);
+  height: calc(var(--zoom) * 100%);
+  left: calc(50% - var(--cx) * var(--zoom) * 1%);
+  top: calc(50% - var(--cy) * var(--zoom) * 1%);
+}
+
+/* 고르는 동안 미리보기가 항상 보이게 붙여둔다 */
+/* 보라 카드 없이 얼굴 미리보기만 둔다.
+   부위 탭도 같이 붙여둔다 — 따로 두면 스크롤할 때 미리보기가 탭을 덮어 부위를 못 고른다. */
+.face-stage {
+  position: sticky;
+  top: var(--s2);
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* 얼굴을 크게. 부위 탭까지 같이 붙어 있으므로 화면 높이로도 제한해 목록 자리를 남긴다. */
+.face-preview {
+  position: relative;
+  width: min(100%, 38dvh);
+  aspect-ratio: 1;
+  background: var(--white);
+  border: var(--bw) solid var(--line);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+}
+
+/* 랜덤·처음으로·이미지 저장 — 고르는 칸과 취소/완료 사이 한 줄 */
+.face-actions-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--s2);
+}
+
+.face-tabs {
+  align-self: stretch;
+  display: flex;
+  gap: var(--s2);
+  overflow-x: auto;
+  /* 붙어 있는 줄이라 아래 카드가 그 밑으로 지나간다. 살짝 깔아줘야 부위 이름이 안 겹쳐 보인다. */
+  background: var(--cream);
+  border-radius: var(--r-md);
+  padding: var(--s1) var(--s1) var(--s2);
+  scroll-snap-type: x proximity;
+}
+
+.face-tab {
+  scroll-snap-align: start;
+}
+
+.face-tab {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--s1);
+  width: 64px;
+  font-family: var(--display);
+  font-size: var(--step--1);
+}
+
+.face-thumb {
+  position: relative;
+  width: 56px;
+  aspect-ratio: 1;
+  background: var(--white);
+  border: var(--bw) solid var(--line);
+  border-radius: var(--r-md);
+  overflow: hidden;
+}
+
+.face-tab.is-on .face-thumb {
+  background: var(--lemon);
+  box-shadow: var(--sh-1);
+}
+
+.face-tools {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--s3);
+}
+
+.face-swatches {
+  display: grid;
+  /* .face-tools 가 세로 flex 라 늘려주지 않으면 칸 하나 너비로 쪼그라든다 */
+  width: 100%;
+  /* 폰에서 한 줄에 여덟 개. 화면이 넓어지면 칸이 커지는 대신 개수가 늘어난다 */
+  grid-template-columns: repeat(auto-fit, minmax(38px, 1fr));
+  gap: var(--s2);
+  margin-bottom: var(--s3);
+}
+
+.face-swatch {
+  aspect-ratio: 1;
+  min-height: 38px; /* 손가락으로 누를 수 있는 크기 */
+  background: var(--swatch);
+  border: var(--bw) solid var(--line);
+  border-radius: var(--r-md);
+  cursor: pointer;
+  padding: 0;
+}
+
+.face-swatch.is-on {
+  box-shadow: 0 0 0 3px var(--white), 0 0 0 6px var(--line);
+}
+
+.face-color {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--s3);
+}
+
+.face-color input {
+  width: 72px;
+  height: 44px;
+  padding: var(--s1);
+  background: var(--white);
+  border: var(--bw) solid var(--line);
+  border-radius: var(--r-md);
+  cursor: pointer;
+}
+
+.face-sliders {
+  display: grid;
+  gap: var(--s2);
+  align-self: stretch;
+}
+
+.face-slider {
+  display: grid;
+  gap: var(--s1);
+  font-family: var(--display);
+  font-size: var(--step--1);
+}
+
+.face-slider input {
+  width: 100%;
+  accent-color: var(--pink);
+}
+
+.face-focus {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s2);
+}
+
+.face-focus small {
+  flex-basis: 100%;
+}
+
+.face-focus-cell {
+  position: relative;
+  padding: var(--s1) var(--s1) 0 0;
+}
+
+.face-focus .face-item {
+  width: 48px;
+}
+
+/* 고른 파츠 오른쪽 위의 작은 × — 누르면 그 파츠를 뺀다 */
+.face-remove {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  background: var(--pink);
+  color: var(--white);
+  border: 2px solid var(--line);
+  border-radius: var(--r-pill);
+  font-size: var(--step--1);
+  line-height: 1;
+}
+
+/* 아이템은 한 줄로 두고 옆으로 넘겨 본다. 여러 줄로 쌓으면 조절 칸 아래로 밀려 안 보인다. */
+.face-items {
+  display: flex;
+  gap: var(--s2);
+  overflow-x: auto;
+  padding-bottom: var(--s2);
+  scroll-snap-type: x proximity;
+}
+
+.face-item {
+  position: relative;
+  flex: none;
+  width: 72px;
+  aspect-ratio: 1;
+  scroll-snap-align: start;
+  background: var(--white);
+  border: var(--bw) solid var(--line);
+  border-radius: var(--r-md);
+  overflow: hidden;
+  font-family: var(--display);
+}
+
+.face-item.is-on {
+  background: var(--lemon-soft);
+  box-shadow: inset 0 0 0 var(--bw) var(--pink);
+}
+
+.watch-name {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s2);
+}
+
+.watch-name .avatar {
+  --sticker: 44px;
+}
+
+/* ---------- 미니게임 ---------- */
+
+/* 배경은 두 겹이다.
+   --zone-art  : 게임마다 다른 그림 (없으면 안 깔린다)
+   --zone-bg   : 예전부터 쓰던 그라데이션. 그림이 404여도 이게 남는다. */
+.game-zone {
+  position: relative;
+  /* 58dvh 고정이던 시절엔 점수줄(.scoreline)과 목숨이 화면 밖으로 밀려났다.
+     어르신 모드는 상단바·설명·도움 버튼이 다 커져서 특히 심했다.
+     이제 남는 높이만 차지하고, 모자라면 min-height까지 줄어든다. */
+  flex: 1;
+  min-height: min(34dvh, 260px);
+  max-height: min(58dvh, 420px);
+  --zone-bg: linear-gradient(180deg, var(--white), var(--lav-soft));
+  background: var(--zone-art, none) center / cover no-repeat, var(--zone-bg);
+  border: var(--bw) solid var(--line);
+  border-radius: var(--r-md);
+  box-shadow: inset 0 3px 0 var(--white);
+  overflow: hidden;
+  touch-action: manipulation;
+  user-select: none;
+}
+
+/* 손가락을 끌어서 조종하는 게임(벽돌 깨기의 바). manipulation 그대로 두면
+   세로로 조금만 끌려도 브라우저가 페이지 스크롤로 가로채서 바가 손가락을 놓친다. */
+.game-zone.grab-zone {
+  touch-action: none;
+}
+
+.game-zone.sky-zone {
+  --zone-bg: linear-gradient(180deg, var(--sky) 0 62%, var(--mint-soft) 62% 100%);
+}
+
+.game-zone.ice-zone {
+  --zone-bg: linear-gradient(180deg, var(--sky) 0 66%, var(--white) 66% 100%);
+}
+
+.game-zone.circus-zone {
+  --zone-bg: linear-gradient(180deg, var(--lav) 0 66%, var(--lemon-soft) 66% 100%);
+}
+
+.game-zone.water-zone {
+  --zone-bg: linear-gradient(180deg, var(--mint-soft), var(--sky));
+}
+
+/* 게임판 배경 그림. 파일이 없으면 이 줄만 무시되고 그라데이션이 남는다. */
+.game-zone.bg-sky {
+  --zone-art: url('../public/game/bg/sky.png');
+}
+
+.game-zone.bg-table {
+  --zone-art: url('../public/game/bg/table.png');
+}
+
+.game-zone.bg-party {
+  --zone-art: url('../public/game/bg/party.png');
+}
+
+.game-zone.bg-sea {
+  --zone-art: url('../public/game/bg/sea.png');
+}
+
+.game-zone.bg-heart {
+  --zone-art: url('../public/game/bg/heart.png');
+}
+
+.game-zone.bg-spotlight {
+  --zone-art: url('../public/game/bg/spotlight.png');
+}
+
+.game-zone.bg-gallery {
+  --zone-art: url('../public/game/bg/gallery.png');
+}
+
+.game-zone.bg-ice {
+  --zone-art: url('../public/game/bg/ice.png');
+}
+
+.game-zone.bg-space {
+  --zone-art: url('../public/game/bg/space.png');
+}
+
+.game-zone.bg-circus {
+  --zone-art: url('../public/game/bg/circus.png');
+}
+
+.game-zone.bg-stage {
+  --zone-art: url('../public/game/bg/stage.png');
+}
+
+/* ---------- 남극 탐험 (고전 남극탐험처럼 지평선으로 달린다) ---------- */
+
+.ice-road {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* 지평선으로 좁아지는 길. 그림 자체가 원근과 차선 점선을 담고 있으므로
+   예전처럼 clip-path로 사다리꼴을 오려낼 필요가 없다. */
+.ice-road::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 34%;
+  /* 바닥까지 내려온다. 14%를 띄웠을 땐 길 아래쪽이 잘린 것처럼 보였다. */
+  bottom: 0;
+  background: url('../public/game/ice-road.png') bottom center / 100% 100% no-repeat;
+}
+
+/* 달려오는 눈금 — 속도감 */
+.road-mark {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 4px;
+  background: var(--sky);
+  border-radius: 2px;
+  will-change: transform;
+}
+
+.road-thing {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: grid;
+  place-items: center;
+  font-family: var(--emoji);
+  will-change: transform;
+}
+
+/* 구덩이 그림에 외곽선과 갈라진 금이 이미 들어 있다. 여기서 테두리를 또 두르지 않는다.
+   그림 비율은 2.097:1 — js/minigames.js 가 이 값으로 높이를 잡는다. */
+.road-hole {
+  background: url('../public/game/ice-hole.png') center / 100% 100% no-repeat;
+}
+
+.road-fish img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.penguin-runner {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 30;
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  font-family: var(--emoji);
+  font-size: 48px;
+  line-height: 1;
+  filter: drop-shadow(3px 5px 0 var(--line));
+  will-change: transform;
+  pointer-events: none;
+}
+
+.penguin-runner img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.ground-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 34%;
+  border-top: var(--bw) dashed var(--line);
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+/* 남은 하트. 이모지라 폰트를 따로 지정해야 색이 살아난다. */
+.lives {
+  font-family: var(--emoji);
+  letter-spacing: 1px;
+}
+
+.lives i {
+  font-style: normal;
+}
+
+.lives i.spent {
+  filter: grayscale(1);
+  opacity: 0.3;
+}
+
+/* 하트를 다 썼을 때 게임판 위에 잠깐 뜨는 알림 */
+.game-over {
+  position: absolute;
+  inset: 0;
+  z-index: 40;
+  display: grid;
+  place-content: center;
+  gap: var(--s2);
+  text-align: center;
+  background: var(--veil-strong);
+  animation: pop-in 0.28s cubic-bezier(0.34, 1.6, 0.64, 1) both;
+}
+
+.game-over b {
+  font-family: var(--display);
+  font-size: var(--step-2);
+  color: var(--ink);
+}
+
+.game-over span {
+  font-family: var(--display);
+  font-size: var(--step-0);
+  color: var(--ink);
+}
+
+.scoreline {
+  display: flex;
+  justify-content: center;
+  gap: var(--s2);
+  flex-wrap: wrap;
+}
+
+.instruction {
+  font-family: var(--display);
+  font-size: var(--step-1);
+  text-align: center;
+}
+
+.elder .instruction {
+  font-size: var(--step-2);
+}
+
+.help-dock {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s2);
+  animation: rise 0.3s cubic-bezier(0.34, 1.5, 0.64, 1) both;
+}
+
+/* ---------- 게임별 요소 ---------- */
+
+.actor--sprite,
+.basket--sprite {
+  filter: none;
+}
+
+.actor--sprite img,
+.basket--sprite img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  pointer-events: none;
+}
+
+.basket {
+  position: absolute;
+  bottom: 6px;
+  left: 0;
+  font-family: var(--emoji);
+  line-height: 1;
+  filter: drop-shadow(2px 3px 0 var(--line));
+  will-change: transform;
+  pointer-events: none;
+}
+
+/* 바 높이를 바꾸면 minigames.js 의 paddleTop(= H - bottom - height)도 같이 바꿔야
+   공이 그림보다 위에서 튀거나 그림을 파고든다. 지금은 12 + 22 = 34. */
+.paddle {
+  position: absolute;
+  bottom: 12px;
+  left: 0;
+  height: 22px;
+  background: url('../public/game/paddle.png') center / 100% 100% no-repeat;
+  will-change: transform;
+  pointer-events: none;
+}
+
+/* 그림이 없으면 예전처럼 분홍 알약으로 그린다 */
+.paddle.no-art {
+  background: var(--pink);
+  border: var(--bw) solid var(--line);
+  border-radius: var(--r-pill);
+}
+
+/* 벽돌 그림에는 외곽선이 이미 그려져 있으므로 여기서 border를 또 두르지 않는다.
+   background-color는 그림이 404일 때를 위한 바탕이다. 그림과 같은 색이라
+   둥근 모서리 밖으로 비쳐도 티가 나지 않는다. */
+.brick {
+  position: absolute;
+  left: 0;
+  top: 0;
+  background-color: var(--brick-color);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 100% 100%;
+  border-radius: var(--r-sm);
+  pointer-events: none;
+}
+
+.brick--0 {
+  --brick-color: var(--pink);
+  background-image: url('../public/game/brick-0.png');
+}
+
+.brick--1 {
+  --brick-color: var(--lemon);
+  background-image: url('../public/game/brick-1.png');
+}
+
+.brick--2 {
+  --brick-color: var(--mint);
+  background-image: url('../public/game/brick-2.png');
+}
+
+.brick--3 {
+  --brick-color: var(--lav);
+  background-image: url('../public/game/brick-3.png');
+}
+
+.brick--4 {
+  --brick-color: var(--sky);
+  background-image: url('../public/game/brick-4.png');
+}
+
+.ball {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 20px;
+  height: 20px;
+  background: var(--lemon);
+  border: var(--bw) solid var(--line);
+  border-radius: 50%;
+  will-change: transform;
+  pointer-events: none;
+}
+
+.game-zone.rhythm-zone {
+  --zone-bg: linear-gradient(180deg, var(--lav) 0 78%, var(--lav-soft) 78% 100%);
+}
+
+.rhythm-board {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: repeat(var(--lanes, 3), 1fr);
+}
+
+.rhythm-lane {
+  /* 패드가 이 칸 기준으로 놓여야 한다. position이 없으면 셋 다 보드 가운데로 겹친다. */
+  position: relative;
+  border: 0;
+  border-right: var(--bw) dashed var(--veil);
+  background: none;
+  transition: background 0.12s;
+}
+
+.rhythm-lane:last-child {
+  border-right: 0;
+}
+
+.rhythm-lane.struck {
+  background: var(--veil-strong);
+}
+
+/* 어디를 눌러야 하는지 보이게 — 판정선 위에 손가락 패드 */
+.rhythm-pad {
+  position: absolute;
+  left: 50%;
+  top: 78%;
+  transform: translate(-50%, -50%);
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  font-family: var(--emoji);
+  font-size: 28px;
+  line-height: 1;
+  background: var(--veil-strong);
+  border: var(--bw) solid var(--line);
+  border-radius: 50%;
+  box-shadow: var(--sh-1);
+  pointer-events: none;
+}
+
+.rhythm-lane.struck .rhythm-pad {
+  background: var(--lemon);
+  transform: translate(-50%, -50%) scale(1.12);
+}
+
+.rhythm-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 78%;
+  height: 6px;
+  margin-top: -3px;
+  background: var(--lemon);
+  border-block: var(--bw) solid var(--line);
+  z-index: 2;
+  pointer-events: none;
+}
+
+.diff-grid {
+  position: absolute;
+  inset: var(--s2);
+  display: grid;
+  grid-template-rows: 1fr 1fr;
+  gap: var(--s2);
+}
+
+.diff-panel {
+  display: grid;
+  gap: var(--s1);
+  padding: var(--s2);
+  background: var(--white);
+  border: var(--bw) solid var(--line);
+  border-radius: var(--r-sm);
+}
+
+.diff-cell {
+  display: grid;
+  place-items: center;
+  font-family: var(--emoji);
+  font-size: var(--art-md);
+  line-height: 1;
+  border-radius: var(--r-sm);
+  transition: background 0.12s, transform 0.12s;
+}
+
+.diff-cell:active {
+  transform: scale(0.92);
+}
+
+.diff-cell.reveal {
+  background: var(--lemon);
+  animation: glow 0.5s ease-in-out 3;
+}
+
+.timing-meter {
+  position: absolute;
+  left: var(--s4);
+  right: var(--s4);
+  top: 38%;
+  height: 40px;
+  background: var(--white);
+  border: var(--bw) solid var(--line);
+  border-radius: var(--r-pill);
+  overflow: hidden;
+}
+
+.timing-band {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: repeating-linear-gradient(
+    45deg,
+    var(--mint) 0 10px,
+    var(--mint-soft) 10px 20px
+  );
+}
+
+.timing-needle {
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  width: 10px;
+  background: var(--pink);
+  border: var(--bw) solid var(--line);
+  border-radius: var(--r-pill);
+  will-change: transform;
+}
+
+/* transform으로 중앙정렬하면 .btn:hover의 transform이 그걸 덮어써서 버튼이 옆으로 튄다.
+   margin auto로 가운데를 잡아 hover/active 효과와 충돌하지 않게 한다. */
+.zone-button {
+  position: absolute;
+  left: 0;
+  right: 0;
+  /* 게임판 바닥에 바짝 붙인다. 위로 띄울수록 뛰어놀 자리가 줄어든다. */
+  bottom: var(--s2);
+  width: fit-content;
+  margin-inline: auto;
+  /* 펭귄(.penguin-runner, z-index 30)보다 위. 점프 중에 펭귄이 버튼을 덮으면
+     버튼 글씨가 가려지고 누르기도 애매해진다. */
+  z-index: 40;
+  /* .btn 기본값(min-height 52px + s3/s4 패딩 + step-1 글씨)이면 게임판 높이의
+     4분의 1을 먹는다. 게임판 안에 얹히는 버튼이라 바깥 버튼만큼 클 이유가 없다.
+     44px은 터치 타깃 최소치라서 이 밑으로는 내리지 않는다. */
+  min-height: 44px;
+  padding: var(--s2) var(--s3);
+  font-size: var(--step-0);
+}
+
+/* .elder .btn(64px)이 특정도로 이기므로 여기서 다시 잡는다.
+   어르신은 조금 크게 두되 게임판을 반쯤 덮을 정도는 아니게. */
+.elder .zone-button {
+  min-height: 52px;
+}
+
+.candle-slot {
+  position: absolute;
+  width: 46px;
+  height: 46px;
+  margin: -23px 0 0 -23px;
+  display: grid;
+  place-items: center;
+  font-family: var(--emoji);
+  font-size: 26px;
+  line-height: 1;
+  border: var(--bw) dashed var(--line);
+  border-radius: 50%;
+  opacity: 0.55;
+  background: var(--veil-strong);
+}
+
+.candle-slot.filled {
+  opacity: 1;
+  border-style: solid;
+  background: var(--lemon-soft);
+  padding: 4px;
+}
+
+.candle-slot.alight {
+  background: var(--lemon);
+  box-shadow: 0 0 14px var(--lemon);
+}
+
+.tray-candle {
+  padding: 5px;
+}
+
+.candle-tray {
+  position: absolute;
+  left: var(--s2);
+  right: var(--s2);
+  bottom: var(--s2);
+  display: flex;
+  justify-content: center;
+  gap: var(--s2);
+  flex-wrap: wrap;
+  z-index: 2;
+}
+
+.tray-candle {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  font-family: var(--emoji);
+  font-size: 26px;
+  line-height: 1;
+  background: var(--white);
+  border: var(--bw) solid var(--line);
+  border-radius: var(--r-sm);
+  box-shadow: var(--sh-1);
+  touch-action: none;
+}
+
+.tray-candle.picked {
+  background: var(--lemon);
+  transform: translateY(-4px) scale(1.06);
+}
+
+.game-cake {
+  position: absolute;
+  left: 50%;
+  top: 40%;
+  transform: translate(-50%, -50%);
+  font-family: var(--emoji);
+  font-size: var(--art-2xl);
+  line-height: 1;
+  filter: drop-shadow(3px 4px 0 var(--line));
+  pointer-events: none;
+}
+
+/* 색깔 초 기억하기 — 색 이름은 js/minigames.js 의 CANDLE_COLORS 와 짝 */
+[data-candle="pink"] {
+  --candle: var(--pink);
+}
+
+[data-candle="sky"] {
+  --candle: var(--sky);
+}
+
+[data-candle="lemon"] {
+  --candle: var(--lemon);
+}
+
+[data-candle="mint"] {
+  --candle: var(--mint);
+}
+
+[data-candle="lav"] {
+  --candle: var(--lav);
+}
+
+/* 외우는 동안(is-shown)·맞게 꽂은 뒤(filled)·어린이 힌트(hint)에만 색이 보인다.
+   가려진 자리는 위의 회색 점선 동그라미 그대로다. */
+.candle-slot.is-shown,
+.candle-slot.filled,
+.candle-slot.hint {
+  opacity: 1;
+  border-style: solid;
+  background: var(--candle);
+  padding: 4px;
+}
+
+.candle-slot.hint {
+  box-shadow: 0 0 0 var(--bw) var(--white), 0 0 0 calc(var(--bw) * 2) var(--line);
+}
+
+.tray-candle[data-candle],
+.drag-ghost[data-candle] {
+  background: var(--candle);
+  border-radius: var(--r-sm);
+}
+
+/* 외우는 동안엔 트레이를 못 건드린다 */
+.candle-tray.is-locked {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.candle-replay {
+  align-self: center;
+}
+
+/* ---------- 미션 클리어 ---------- */
+
+.clear-card {
+  align-items: center;
+  text-align: center;
+}
+
+/* ---------- 내 성공 페이지 ---------- */
+
+.success-badge {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  /* 낮은 폰에서는 축하 도장이 마지막 버튼을 화면 밖으로 밀어낸다. 장식이므로 먼저 양보한다. */
+  --sticker: min(116px, 15dvh);
+}
+
+.success-badge .clear-stamp {
+  width: min(130px, 17dvh);
+}
+
+/* ---------- 실시간 관전 ---------- */
+
+/* 관전 화면은 눌러서 다음 사람으로 넘어간다. 그래서 판 자체는 터치를 받아야 하고,
+   중계된 내용물(게임 버튼 등)은 눌리면 안 된다. */
+/* 관전 판은 보내는 사람 판의 비율을 따라간다(screens.js가 aspect-ratio를 박는다).
+   그런데 PC처럼 넓고 낮은 판을 중계받으면 폰에서 납작하게 눌린다.
+   최소 높이를 잡아두면 그런 경우에도 볼만한 크기가 나온다 — 남는 위아래는
+   판 배경 그림이 채우고, 게임 화면은 잘리지 않는다. */
+.watch-zone {
+  min-height: min(38dvh, 260px);
+  /* 위쪽(이름·게임명)과 아래쪽(점수·안내·하트 버튼)이 화면의 절반을 쓴다.
+     이보다 키우면 하트 보내기 버튼이 화면 밖으로 밀려 스크롤이 생긴다. */
+  max-height: min(45dvh, 330px);
+}
+
+.watch-zone > * {
+  pointer-events: none;
+}
+
+/* 보내는 사람의 게임판을 원래 크기로 만든 뒤 통째로 줄인다.
+   왼쪽 위에 붙여 놓고 가운데로 미는 건 screens.js가 픽셀로 계산한다.
+   margin:auto로 가운데를 잡으려 했더니, 무대가 관전 판보다 클 때 CSS가
+   왼쪽 여백을 0으로 고정해버려서(§10.3.7) 오른쪽으로 밀려났다. */
+.watch-stage {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform-origin: 0 0;
+}
+
+.watch-hint {
+  font-family: var(--display);
+  font-size: var(--step--1);
+  opacity: 0.75;
+}
+
+.watch-zone .btn {
+  opacity: 0.75;
+}
+
+.watch-idle {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  padding: var(--s4);
+  text-align: center;
+  font-family: var(--display);
+  font-size: var(--step-1);
+  line-height: 1.6;
+}
+
+.waiting-watch {
+  display: grid;
+  place-items: center;
+  gap: var(--s2);
+  padding: var(--s5) var(--s3);
+  text-align: center;
+  font-family: var(--display);
+  background: var(--white);
+  border: var(--bw) dashed var(--line);
+  border-radius: var(--r-md);
+}
+
+/* ---------- 주인공 라운지 / 피날레 ---------- */
+
+/* 스티커 칩 없이 이모지만 크게 — 주인공 라운지의 케이크 */
+.host-hero {
+  text-align: center;
+  font-family: var(--emoji);
+  font-size: var(--art-xl);
+  line-height: 1;
+  filter: drop-shadow(3px 4px 0 var(--line));
+  animation: bob 3.4s ease-in-out infinite;
+}
+
+.final-card {
+  align-items: center;
+  text-align: center;
+  background: linear-gradient(160deg, var(--lav-soft), var(--pink-soft));
+}
+
+/* ---------- 편지 ---------- */
+
+.letter-tab canvas {
+  width: 100%;
+  aspect-ratio: 12 / 7;
+  background: var(--white);
+  border: var(--bw) solid var(--line);
+  border-radius: var(--r-sm);
+}
+
+.drawing-tools {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s2);
+  font-family: var(--display);
+  font-size: var(--step-1);
+}
+
+.letter-private {
+  font-size: var(--step--1);
+  text-align: center;
+  opacity: 0.75;
+}
+
+.letter-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s3);
+}
+
+.received-letter {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s2);
+  padding: var(--s3);
+  background: var(--white);
+  border: var(--bw) solid var(--line);
+  border-radius: var(--r-md);
+  box-shadow: var(--sh-1);
+  animation: pop-in 0.34s cubic-bezier(0.34, 1.6, 0.64, 1) both;
+  animation-delay: calc(min(var(--i, 0), 8) * 55ms);
+}
+
+.received-letter img {
+  border: var(--bw) solid var(--line);
+  border-radius: var(--r-sm);
+}
+
+/* ---------- 편집 모드 ---------- */
+
+.editor-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s2);
+}
+
+.editor-row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s2);
+  padding: var(--s3);
+  background: var(--white);
+  border: var(--bw) solid var(--line);
+  border-radius: var(--r-md);
+  animation: pop-in 0.3s cubic-bezier(0.34, 1.6, 0.64, 1) both;
+  animation-delay: calc(min(var(--i, 0), 8) * 35ms);
+}
+
+.editor-row-top {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  align-items: center;
+  gap: var(--s2);
+}
+
+/* ▲▼가 들어가면서 이름 칸이 좁아져 "사촌동생 2"가 잘렸다. 편집 줄의 얼굴만 조금 줄인다. */
+.editor-row-top .avatar {
+  --sticker: 50px;
+}
+
+/* ▲▼ 순서 바꾸기 — 세로로 쌓아서 이름 칸 폭을 덜 뺏는다 */
+.editor-move {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s1);
+}
+
+.editor-move .btn {
+  min-height: 28px;
+  width: 36px;
+  padding: 0;
+  font-size: var(--step--1);
+}
+
+.editor-flags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s3);
+}
+
+.editor-flags label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s1);
+  font-size: var(--step--1);
+}
+
+.editor-controls {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--s2);
+}
+
+.setting-label {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s1);
+}
+
+.topping-slots {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s2);
+}
+
+.topping-slot {
+  display: grid;
+  grid-template-columns: 52px 1fr;
+  align-items: center;
+  gap: var(--s1) var(--s2);
+  padding: var(--s2);
+  font-size: var(--step--1);
+  background: var(--white);
+  border: var(--bw) solid var(--line);
+  border-radius: var(--r-sm);
+}
+
+.topping-slot img {
+  width: 52px;
+  height: 52px;
+  object-fit: contain;
+}
+
+/* 교체 목록은 칸 전체 폭으로 펼친다 */
+.topping-swap {
+  grid-column: 1 / -1;
+}
+
+.topping-swap summary {
+  list-style: none;
+  cursor: pointer;
+}
+
+.topping-swap summary::-webkit-details-marker {
+  display: none;
+}
+
+.topping-choices {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(48px, 1fr));
+  gap: var(--s1);
+  margin-top: var(--s2);
+}
+
+.topping-choice {
+  aspect-ratio: 1;
+  padding: var(--s1);
+  background: var(--cream);
+  border: 2px solid var(--line);
+  border-radius: var(--r-sm);
+}
+
+.topping-choice img {
+  width: 100%;
+  height: 100%;
+}
+
+.topping-choice.is-on {
+  background: var(--lemon);
+}
+
+.topping-count {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s3);
+  font-family: var(--display);
+}
+
+.upload-label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s1);
+  padding: var(--s1) var(--s2);
+  font-family: var(--display);
+  font-size: var(--step--1);
+  background: var(--lemon-soft);
+  border: var(--bw) solid var(--line);
+  border-radius: var(--r-pill);
+  cursor: pointer;
+}
+
+.upload-label:focus-within {
+  outline: var(--bw) solid var(--lemon);
+  outline-offset: 2px;
+}
+
+.upload-label input {
+  display: none;
+}
+
+/* 초대 코드. 전화로 불러주거나 받아 적는 글자라 크고 또렷하게, 자간을 벌려 둔다. */
+.party-code {
+  font-family: var(--display);
+  font-size: var(--step-4);
+  letter-spacing: 0.18em;
+  text-align: center;
+  padding: var(--s2);
+  background: var(--white);
+  border: var(--bw) solid var(--line);
+  border-radius: var(--r-sm);
+}
+
+/* 초대 코드 입력칸. 다섯 글자뿐이라 크게 띄워 놓는다.
+   selector에 input을 붙인 이유: components.css의 input[type="text"]가
+   클래스 하나보다 구체적이라, .code-input 만으로는 글자 크기가 안 먹었다. */
+input.code-input {
+  width: 100%;
+  font-family: var(--display);
+  font-size: var(--step-3);
+  letter-spacing: 0.18em;
+  text-align: center;
+  text-transform: uppercase;
+  padding: var(--s3);
+  color: var(--ink);
+  background: var(--white);
+  border: var(--bw) solid var(--line);
+  border-radius: var(--r-md);
+}
+
+.code-problem {
+  font-family: var(--display);
+  color: var(--ink);
+  opacity: 0.85;
+}
+
+.entry-screen {
+  gap: var(--s4);
+  justify-content: center;
+}
+
+/* 공유할 주소. 가족이 직접 타이핑할 수도 있어서 읽기 쉬운 크기로 두고,
+   길어도 줄바꿈해서 화면 밖으로 안 나가게 한다. */
+.share-link {
+  font-family: var(--display);
+  font-size: var(--step-1);
+  text-align: center;
+  word-break: break-all;
+  padding: var(--s2);
+  background: var(--white);
+  border: var(--bw) solid var(--line);
+  border-radius: var(--r-sm);
+}
+
+.editor-help {
+  font-size: var(--step--1);
+  line-height: 1.7;
+  opacity: 0.85;
+}
+
+/* ---------- 반응형 ---------- */
+
+@media (max-width: 380px) {
+  .editor-controls {
+    grid-template-columns: 1fr;
+  }
+
+  .person-choice {
+    grid-template-columns: auto 1fr;
+  }
+
+  .person-meta {
+    grid-column: 2;
+    white-space: normal;
+  }
+}
+
+/* ---------- 선물 상자 ---------- */
+
+/* 카드(네모칸)에 담지 않는다. 하늘 배경 위에 상자와 글씨만 떠 있어야
+   "선물이 도착했다"는 순간이 살아난다. */
+.gift-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s3);
+  flex: 1;
+  text-align: center;
+}
+
+/* 상자와 편지가 같은 자리에서 교대한다. 자리를 미리 잡아둬야
+   상자가 사라질 때 아래 글씨가 위로 튀어오르지 않는다. */
+.gift-stage {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  min-height: min(34dvh, 240px);
+}
+
+/* 닫힌 상자(가로 1.37)와 열린 상자(세로 0.75)는 비율이 정반대다.
+   폭을 기준으로 잡으면 그림이 바뀌는 순간 높이가 튀어 화면이 출렁인다.
+   높이를 고정하고 폭이 따라오게 해서 두 그림이 같은 자리에 같은 크기로 앉는다. */
+.gift-box {
+  width: auto;
+  height: min(30dvh, 210px);
+  max-width: 80%;
+  filter: drop-shadow(4px 6px 0 var(--shade));
+}
+
+.gift-letter {
+  position: absolute;
+  font-family: var(--emoji);
+  font-size: min(28vw, 124px);
+  line-height: 1;
+  padding: var(--s2);
+  border: 0;
+  background: none;
+  cursor: pointer;
+  filter: drop-shadow(4px 6px 0 var(--line));
+}
+
+.gift-letter:active {
+  transform: scale(0.94);
+}
+
+/* 배경 위에 바로 얹히므로 글자에 흰 테두리를 둘러 어디서든 읽히게 한다
+   (.identity-head 와 같은 방식) */
+.gift-tada {
+  font-size: var(--step-2);
+  line-height: 1.25;
+  text-shadow: 0 3px 0 var(--white), 0 -3px 0 var(--white), 3px 0 0 var(--white),
+    -3px 0 0 var(--white);
+}
+
+/* 폰에서 줄이 엉뚱하게 끊기지 않도록 줄 단위로 직접 나눈다 */
+.gift-tada span {
+  display: block;
+}
+
+.gift-hint {
+  font-family: var(--display);
+  font-size: var(--step-0);
+  text-shadow: 0 2px 0 var(--white), 0 -2px 0 var(--white), 2px 0 0 var(--white),
+    -2px 0 0 var(--white);
+}
+
+.gift-box.gone {
+  display: none;
+}
+
+/* ---------- 게임 대신 하는 오프라인 미션 ---------- */
+
+.offline-card {
+  text-align: center;
+  align-items: center;
+}
+
+/* 미션 문장이 이 화면의 주인공이다. 크고 굵게. */
+.offline-mission {
+  font-family: var(--display);
+  font-size: var(--step-2);
+  line-height: 1.35;
+}
+
+.offline-hint {
+  font-size: var(--step--1);
+  opacity: 0.75;
+}
+
+/* ============================================================
+   가로 모드 차단 — 세로로만 논다
+
+   폰을 눕히면 높이가 274px밖에 안 남는다(갤럭시 S24 실측).
+   그 안에 게임판·점수·하트·버튼을 다 넣으려면 정보를 덜어내야 하고,
+   그렇게 만든 가로 배치는 세로만 못했다. 그래서 가로에서는 아예 안 논다.
+
+   브라우저는 웹페이지의 화면 회전을 강제로 잠글 수 없다(전체화면 아니면 막혀 있다).
+   대신 눕히면 이 안내가 화면을 덮고, 다시 세우면 하던 자리 그대로 이어진다.
+   게임은 뒤에서 계속 돌지 않는다 — 안내가 덮고 있는 동안 터치가 닿지 않는다.
+
+   홈 화면에 추가해서 쓰면 app.webmanifest 의 orientation 이 진짜로 세로를 잠근다.
+   ============================================================ */
+
+.rotate-notice {
+  display: none;
+}
+
+@media (orientation: landscape) and (max-height: 560px) {
+  .rotate-notice {
+    position: fixed;
+    inset: 0;
+    z-index: 90;
+    display: grid;
+    place-content: center;
+    justify-items: center;
+    gap: var(--s3);
+    padding: var(--s4);
+    text-align: center;
+    background: var(--cream);
+  }
+
+  .rotate-notice i {
+    font-family: var(--emoji);
+    font-size: 64px;
+    line-height: 1;
+    font-style: normal;
+    animation: rotate-hint 2.4s ease-in-out infinite;
+  }
+
+  .rotate-notice b {
+    font-family: var(--display);
+    font-size: var(--step-2);
+  }
+
+  .rotate-notice span {
+    font-family: var(--display);
+    font-size: var(--step-0);
+    opacity: 0.75;
+  }
+
+  /* 안내가 떠 있는 동안 뒤쪽 화면은 건드릴 수 없다 */
+  .app-shell {
+    visibility: hidden;
+  }
+}

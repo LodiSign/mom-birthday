@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#ff5fa2" />
+    <!-- 홈 화면에 추가해서 쓰면 orientation: portrait 가 세로를 진짜로 잠근다.
+         브라우저 탭에서는 못 잠그므로 .rotate-notice 가 대신 막는다. -->
+    <link rel="manifest" href="app.webmanifest" />
+    <meta name="description" content="가족이 함께 재료를 모아 생일 케이크를 완성하는 파티 게임" />
+    <title>엄마의 생일 대작전!</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="css/tokens.css?v=pop-v1" />
+    <link rel="stylesheet" href="css/base.css?v=pop-v1" />
+    <link rel="stylesheet" href="css/components.css?v=pop-v1" />
+    <link rel="stylesheet" href="css/screens.css?v=pop-v1" />
+    <link rel="stylesheet" href="css/cake.css?v=pop-v1" />
+    <link rel="stylesheet" href="css/motion.css?v=pop-v1" />
+  </head>
+  <body>
+    <div class="sky-decor cloud one" aria-hidden="true"></div>
+    <div class="sky-decor cloud two" aria-hidden="true"></div>
+    <main id="app" class="app-shell"></main>
+    <div id="live" class="sr-only" aria-live="polite"></div>
+    <div class="rotate-notice" role="alert">
+      <i aria-hidden="true">📱</i>
+      <b>세로로 돌려주세요</b>
+      <span>이 게임은 세로 화면에서만 놀 수 있어요</span>
+    </div>
+    <!-- 저장소. supabase 라이브러리 → 연결 값 → 우리 코드. store.js 는 core.js 의 값을 빌려 쓰므로 core.js 뒤. -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.58.0/dist/umd/supabase.min.js"></script>
+    <script src="js/supabase-config.js?v=pop-v1"></script>
+    <script src="js/core.js?v=pop-v1"></script>
+    <script src="js/store.js?v=pop-v1"></script>
+    <script src="js/sfx.js?v=pop-v1"></script>
+    <script src="js/chiptune.js?v=pop-v1"></script>
+    <script src="js/happy-birthday-beats.js?v=pop-v1"></script>
+    <script src="js/minigames.js?v=pop-v1"></script>
+    <script src="js/cake-game.js?v=pop-v1"></script>
+    <script src="js/screens.js?v=pop-v1"></script>
+    <script src="js/face.js?v=pop-v1"></script>
+    <script src="js/editor.js?v=pop-v1"></script>
+    <script src="js/boot.js?v=pop-v1"></script>
+    <!-- 앱으로 설치되게 하는 서비스워커. 파일을 캐시하지는 않는다(sw.js 설명 참고).
+         실패해도 게임은 그대로 돌아가므로 조용히 넘어간다. -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+      }
+    </script>
+  </body>
+</html>
