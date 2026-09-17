@@ -367,12 +367,15 @@ async function familyUrl() {
   }
 }
 
+// 주인공이 엄마가 아닐 수도 있다. 편집 모드에서 정한 주인공 이름을 넣는다.
+const partyTitle = () => `${hostMember()?.name || '우리 가족'}의 생일 대작전`;
+
 /* 단톡방에 붙여넣을 초대 문구. 링크만 보내면 받는 사람이 뭔지 모르고,
    미리보기 그림이 안 뜨는 랜 주소일 때도 문구는 그대로 보인다.
    url 이 빈 문자열이면 링크는 뺀다 — navigator.share 가 url 을 따로 붙이기 때문. */
 function shareText(url) {
   return [
-    '🎂 엄마의 생일 대작전!',
+    `🎂 ${partyTitle()}!`,
     '가족들과 함께 재료를 모아 특별한 케이크를 완성해보세요!',
     '',
     `초대 코드: ${partyCode}`,
@@ -417,7 +420,7 @@ function bindShareLink() {
     if (!url) url = await familyUrl();
     if (navigator.share) {
       try {
-        await navigator.share({ title: '엄마의 생일 대작전', text: shareText(''), url });
+        await navigator.share({ title: partyTitle(), text: shareText(''), url });
         return;
       } catch { /* 사용자가 닫았거나 못 쓰는 기기 — 복사로 넘어간다 */ }
     }
