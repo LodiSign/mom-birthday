@@ -8,6 +8,8 @@
    한 서버가 여러 생일파티를 받는다. 코드가 없으면 여기서 시작한다:
    파티를 새로 만들어 코드를 받거나, 받은 코드로 남의 파티에 들어가거나. */
 function renderEntry(problem = '') {
+  // 설정만 보고 저장 없이 나온 새 파티는 만든 적 없는 것으로 친다 — 코드를 잊는다
+  if (isDraftParty()) setPartyCode('');
   app.innerHTML = h`<div class="screen entry-screen">
     <div class="birthday-hero">
       <h1 aria-label="Happy Birthday">

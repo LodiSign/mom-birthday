@@ -22,11 +22,17 @@ const db = window.supabase.createClient(window.SUPABASE_CONFIG.url, window.SUPAB
 
 const CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 const OWNER_KEY_PREFIX = 'mom-birthday-owner:';
+// 새 파티를 눌러 코드만 받고 아직 한 번도 저장 안 한 파티. 서버에 없으니 "지난번 파티"로 내밀지 않는다.
+const DRAFT_KEY = 'mom-birthday-draft';
 
 /* ---------- 주최자 열쇠 ----------
    파티를 만든 기기에만 있다. 이 열쇠가 있어야 설정·얼굴을 저장할 수 있다. */
 function ownerKey(code = partyCode) {
   try { return localStorage.getItem(OWNER_KEY_PREFIX + code) || ''; } catch { return ''; }
+}
+
+function isDraftParty(code = partyCode) {
+  try { return Boolean(code) && localStorage.getItem(DRAFT_KEY) === code; } catch { return false; }
 }
 
 function randomText(length, chars) {
@@ -44,6 +50,7 @@ async function mintParty() {
     if (data) continue;
     try {
       localStorage.setItem(OWNER_KEY_PREFIX + code, randomText(40, CODE_CHARS + 'abcdefghijkmnopqrstuvwxyz'));
+      localStorage.setItem(DRAFT_KEY, code);
     } catch {
       throw new Error('이 브라우저에는 저장할 수 없어요. 비공개 창이면 일반 창에서 열어주세요.');
     }
@@ -280,8 +287,12 @@ async function apiFetch(path, init = {}) {
     if (route === 'config' && method === 'GET') {
       const saved = await rpc('mbg_config', { p_code: code });
       if (saved) return reply(200, withDefaults(saved));
-      // 이 기기가 만든, 아직 저장 안 한 파티는 기본값을 닫힌 채로
-      if (isEditor && ownerKey(code)) return reply(200, { ...withDefaults({}), open: false });
+      // 이 기기가 만든, 아직 저장 안 한 파티는 기본값을 닫힌 채로.
+      // 초안 표시가 없던 시절에 만든 것도 여기서 초안으로 적어둔다(입장 화면이 잊게).
+      if (isEditor && ownerKey(code)) {
+        try { localStorage.setItem(DRAFT_KEY, code); } catch { /* 무시 */ }
+        return reply(200, { ...withDefaults({}), open: false });
+      }
       return reply(404, { ok: false, error: '그런 초대 코드가 없어요. 다시 확인해주세요.' });
     }
 
@@ -289,6 +300,8 @@ async function apiFetch(path, init = {}) {
       let clean;
       try { clean = cleanConfig(body, config); } catch (error) { return reply(400, { ok: false, error: error.message }); }
       const saved = await rpc('mbg_save_config', { p_code: code, p_key: ownerKey(code), p_config: clean });
+      // 서버에 생겼다 — 이제 진짜 파티
+      if (isDraftParty(code)) try { localStorage.removeItem(DRAFT_KEY); } catch { /* 무시 */ }
       return reply(200, { ok: true, config: withDefaults(saved) });
     }
 
